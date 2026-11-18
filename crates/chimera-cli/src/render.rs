@@ -23,7 +23,7 @@ use chimera::phonetics::sing::{
 };
 use chimera::phonetics::songs::DEMO_SONGS;
 use chimera::phonetics::mandarin::{MandarinLexicon, is_han};
-use chimera::phonetics::syllables::{lyrics_to_syllables, lyrics_to_syllables_with};
+use chimera::phonetics::syllables::lyrics_to_syllables;
 use chimera::phonetics::{Intonation, Plan, Syllable};
 use chimera::voice::human_voice::{HumanVoice, SCOPE_POINTS, SourcePatch, VoiceTelemetry};
 use std::io::Read;
@@ -62,9 +62,14 @@ pub fn zh() -> Result<MandarinLexicon, String> {
 
 /// Lyrics → syllables through every built-in front end (the Mandarin lexicon only when needed).
 pub fn sung_lyrics(text: &str) -> Result<Vec<Syllable>, String> {
+    sung_lyrics_in(text, "en")
+}
+
+/// The same, with the Latin-alphabet words read in `lang` ("pt" for Portuguese).
+pub fn sung_lyrics_in(text: &str, lang: &str) -> Result<Vec<Syllable>, String> {
     let g = g2p()?;
     let lex = if text.chars().any(is_han) { zh()? } else { MandarinLexicon::new() };
-    Ok(lyrics_to_syllables_with(text, &g, &lex))
+    Ok(chimera::phonetics::syllables::lyrics_to_syllables_in(text, lang, &g, &lex))
 }
 
 /// A file name from a song's name: letters of any script, everything else as one "-".

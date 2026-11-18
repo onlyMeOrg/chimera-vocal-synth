@@ -29,6 +29,7 @@ Korean and Mandarin need (`ɕ ʑ tɕ dʑ tʂ dʐ ɥ`, step 3), aspiration as the
 | Hangul | Korean | nothing: a block's letters are its sounds | `phonetics/korean.rs` |
 | Cyrillic | Russian | nothing: spelling rules, stress marked with an acute ([russian.md](russian.md)) | `phonetics/russian.rs` |
 | Han | Mandarin | `public/data/mandarin.txt.gz` (208 KB, fetched when lyrics have Han characters) | `phonetics/mandarin.rs` |
+| Latin, when the lyrics are said to be Portuguese | Brazilian Portuguese | nothing: spelling rules | `phonetics/portuguese.rs` |
 | Latin with tones | Mandarin as pinyin | nothing (checked against Mandarin's 411 syllables) | `phonetics/mandarin.rs` (`Pinyin`) |
 
 The router (`read_lyrics` in `syllables.rs`) sends each word to the front end whose script it is
@@ -43,6 +44,26 @@ them is lost.
 
 `chimera syllables "<lyrics>"` prints what the front ends read, one JSON syllable per sung note:
 the quickest way to check a front end.
+
+## Portuguese
+
+Portuguese shares English's alphabet, and most of its words carry no mark of which language they
+are (`a`, `me`, `casa`, `pare`), so the router is **told**, not left to guess:
+`lyrics_to_syllables_in(text, "pt", …)` (the wasm call's `"lang": "pt"`, the CLI's
+`chimera syllables "<lyrics>" pt`). Portuguese then reads every Latin-alphabet word, before pinyin
+can claim one (`é`, `nó`, `lá` are pinyin syllables too). Unsaid, lyrics read exactly as before.
+
+It is Brazilian Portuguese from spelling rules alone, no data (`phonetics/portuguese.rs` lists
+them): stress from the accent or the ending; the last unstressed e, o, a as [i u ɐ]; t and d
+before [i] as [tʃ dʒ]; nasal vowels from ã, õ and a closing m or n, with the nasal diphthongs
+(ão, ãe, õe, a final -em and -am); an unstressed i or u gliding off the vowel before, or into the
+word's last vowel (his-tó-ria); the two r's ([h] and the tap); a syllable's last l as [w].
+
+Approximate, and written in the file: open and closed e and o are told apart only by a written
+accent; x is [ʃ] outside a short list; a nasal vowel has no nasal consonant after it; one accent
+(final r a tap, a syllable's last s as [s]); words do not link across a space. **No Brazilian
+speaker has listened to it yet**, and the interface has no way to choose it: only the engine, the
+wasm call and the CLI do.
 
 ## Korean
 

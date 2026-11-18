@@ -13,7 +13,7 @@ use chimera::phonetics::planner::{self, PhraseInput, PlanOptions};
 use chimera::phonetics::sing::{self, MelismaOptions, NoteOnOptions, SongOptions, SungNote};
 use chimera::phonetics::english::EnglishG2P;
 use chimera::phonetics::mandarin::MandarinLexicon;
-use chimera::phonetics::syllables::lyrics_to_syllables_with;
+use chimera::phonetics::syllables::lyrics_to_syllables_in;
 use chimera::phonetics::{Segment, Syllable, ipa, songs, vowel_data};
 use chimera::voice::human_airway::HumanAirway;
 use serde_json::{Value, json};
@@ -135,7 +135,11 @@ fn dispatch(st: &mut State, req: &Value) -> Res {
             Ok(json!(true))
         }
         // every built-in front end: pinyin, English, Korean, and Mandarin once its lexicon is loaded
-        "lyricsToSyllables" => to_json(&lyrics_to_syllables_with(&arg::<String>(req, "text")?, &st.g2p, &st.mandarin)),
+        // "lang": "pt" reads Latin-alphabet words as Portuguese; unsaid, English
+        "lyricsToSyllables" => {
+            let lang: Option<String> = arg(req, "lang")?;
+            to_json(&lyrics_to_syllables_in(&arg::<String>(req, "text")?, lang.as_deref().unwrap_or("en"), &st.g2p, &st.mandarin))
+        }
         // ---------------------------------------------------------------- creatures
         "creaturePreview" => {
             let id: String = arg(req, "id")?;

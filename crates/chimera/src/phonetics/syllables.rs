@@ -13,6 +13,7 @@ use crate::anatomy::human::BodyMix;
 use super::english::js_is_space;
 use super::korean::Korean;
 use super::mandarin::{Mandarin, MandarinLexicon, Pinyin};
+use super::portuguese::Portuguese;
 use super::russian::Russian;
 use super::planner::is_vowel;
 use super::{Segment, Syllable};
@@ -321,4 +322,17 @@ pub fn lyrics_to_syllables(text: &str, g2p: &impl WordSource) -> Vec<Syllable> {
 /// all read lyrics through, so a new front end can't be missing from one of them.
 pub fn lyrics_to_syllables_with(text: &str, g2p: &impl WordSource, zh: &MandarinLexicon) -> Vec<Syllable> {
     read_lyrics(text, &[&Pinyin, &English(g2p), &Korean, &Russian, &Mandarin(zh)])
+}
+
+/// The same, for lyrics whose Latin-alphabet words are in `lang` ("pt": Portuguese; anything else:
+/// English, as [`lyrics_to_syllables_with`]). Portuguese and English share an alphabet and most of
+/// their words carry no mark of which they are, so the language is said, not guessed. Portuguese
+/// then reads every Latin word, accented or not, before pinyin can claim one (é, nó and lá are
+/// also pinyin syllables); the other scripts are read as always.
+pub fn lyrics_to_syllables_in(text: &str, lang: &str, g2p: &impl WordSource, zh: &MandarinLexicon) -> Vec<Syllable> {
+    if lang == "pt" {
+        read_lyrics(text, &[&Portuguese, &Korean, &Russian, &Mandarin(zh)])
+    } else {
+        lyrics_to_syllables_with(text, g2p, zh)
+    }
 }
